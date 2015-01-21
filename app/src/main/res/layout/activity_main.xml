@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:text="Send bitch !"
         android:id="@+id/buttonSend"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/editText"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

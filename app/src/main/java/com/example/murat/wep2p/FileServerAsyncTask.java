@@ -35,22 +35,26 @@ public class FileServerAsyncTask extends AsyncTask {
              * call blocks until a connection is accepted from a client
              */
             ServerSocket serverSocket = new ServerSocket(8888);
-            Socket client = serverSocket.accept();
-            String clientIp = client.getInetAddress().toString();
-            activity.addIpAddress(clientIp);
 
-            InputStream inputstream = client.getInputStream();
-            BufferedReader in = new BufferedReader(new InputStreamReader(inputstream));
-            String inputLine;
-            inputLine = in.readLine();
-            in.close();
+            while (true) {
+                Socket client = serverSocket.accept();
+                String clientIp = client.getInetAddress().toString();
+                activity.addIpAddress(clientIp);
 
-            this.statusText.setText(inputLine);
-            serverSocket.close();
+                InputStream inputstream = client.getInputStream();
+                BufferedReader in = new BufferedReader(new InputStreamReader(inputstream));
+                String inputLine;
+                inputLine = in.readLine();
+                in.close();
+
+                this.statusText.setText(inputLine);
+                activity.propagateMessageIfOwner();
+            }
+
+            // serverSocket.close();
         } catch (IOException e) {
-            Log.e("", e.getMessage());
+            Log.e("doInBackground", e.getMessage());
             return null;
         }
-        return null;
     }
 }

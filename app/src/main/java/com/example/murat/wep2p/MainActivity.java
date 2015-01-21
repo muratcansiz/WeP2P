@@ -41,6 +41,7 @@ public class MainActivity extends Activity {
     private EditText messageEdit;
     private List<WifiP2pDevice> knownDevices;
     private FileServerAsyncTask server;
+    private Boolean serverStarted;
     private ArrayList<String> knownIpAddresses;
 
     @Override
@@ -66,6 +67,8 @@ public class MainActivity extends Activity {
         messageView = (TextView) findViewById(R.id.textView);
         messageEdit = (EditText) findViewById(R.id.editText);
         server = new FileServerAsyncTask(getApplicationContext(), messageView, this);
+        this.serverStarted = false;
+
         discoverButton = (Button) findViewById(R.id.button);
         discoverButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,7 +162,10 @@ public class MainActivity extends Activity {
     }
 
     public void startServer() {
-        server.execute();
+        if (!this.serverStarted) {
+            this.serverStarted = true;
+            server.execute();
+        }
     }
 
     public void addIpAddress(String ip) {
@@ -167,11 +173,17 @@ public class MainActivity extends Activity {
         if (!this.knownIpAddresses.contains(ip)) this.knownIpAddresses.add(ip);
     }
 
+    public void propagateMessageIfOwner() {
+        if (this.isTheOwner) this.propagateMessage();
+    }
+
     public void propagateMessage() {
         Iterator<String> ite = this.knownIpAddresses.iterator();
+        Log.d("propagateMessage", "propagating intialized.");
         while(ite.hasNext()) {
             String ipAddress = ite.next();
             String host = ipAddress;
+            Log.d("propagateMessage", "HOST: " + ipAddress);
             int port = 8888;
             Socket socket = new Socket();
 
@@ -194,7 +206,7 @@ public class MainActivity extends Activity {
 
                 outputStream.close();
             } catch (IOException e) {
-                //catch logic
+                Log.e("propagateMessage", "error:" + e.getMessage());
             }
 
             /**
@@ -207,7 +219,7 @@ public class MainActivity extends Activity {
                         try {
                             socket.close();
                         } catch (IOException e) {
-                            //catch logic
+                            Log.e("propagateMessage", "error socket.close :" + e.getMessage());
                         }
                     }
                 }

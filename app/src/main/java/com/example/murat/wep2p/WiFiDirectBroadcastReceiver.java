@@ -123,7 +123,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                                 outputStream.close();
                                 mActivity.addIpAddress(groupOwnerAddress);
                             } catch (IOException e) {
-                                //catch logic
+                                Log.e("Initiating the connection, not owner", e.toString());
                             }
 
                             /**
@@ -135,8 +135,9 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                                     if (socket.isConnected()) {
                                         try {
                                             socket.close();
+                                            Log.d("Initiating the connection, not owner, socket close", "closed socket :)");
                                         } catch (IOException e) {
-                                            //catch logic
+                                            Log.e("Initiating the connection, not owner, socket close", e.toString());
                                         }
                                     }
                                 }
