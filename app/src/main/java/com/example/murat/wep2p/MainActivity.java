@@ -13,11 +13,14 @@ import android.widget.Button;
 import android.util.Log;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pConfig;
+import android.widget.TextView;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 public class MainActivity extends Activity {
     private WifiP2pManager mManager;
@@ -25,12 +28,17 @@ public class MainActivity extends Activity {
     private WiFiDirectBroadcastReceiver mReceiver;
     private IntentFilter mIntentFilter;
     private Button discoverButton;
-    private Collection<WifiP2pDevice> knownDevices;
+    private Button connectButton;
+    private TextView messageView;
+    private List<WifiP2pDevice> knownDevices;
+    private FileServerAsyncTask server;
+    private ArrayList<String> knownIpAddresses;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        knownIpAddresses = new ArrayList<String>();
 
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
@@ -41,6 +49,8 @@ public class MainActivity extends Activity {
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+
+        messageView = (TextView) findViewById(R.id.textView);
 
         discoverButton = (Button) findViewById(R.id.button);
         discoverButton.setOnClickListener(new View.OnClickListener() {
@@ -59,7 +69,14 @@ public class MainActivity extends Activity {
                 });
             }
         });
-
+        connectButton = (Button) findViewById(R.id.buttonConnect);
+        connectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                connectToTheFirst();
+            }
+        });
+        this.knownDevices = new ArrayList<WifiP2pDevice>();
     }
 
     @Override
@@ -89,28 +106,36 @@ public class MainActivity extends Activity {
             Log.d("One Device","Device Address::" + device.deviceAddress);
 
         }
-        knownDevices = devices;
-        connectAll();
+        this.knownDevices.clear();
+        this.knownDevices.addAll(devices);
     }
 
-    private void connectAll() {
-        Iterator it= this.knownDevices.iterator();
-        while (it.hasNext()) {
-            WifiP2pDevice device = (WifiP2pDevice) it.next();
-            WifiP2pConfig config = new WifiP2pConfig();
-            config.deviceAddress = device.deviceAddress;
-            mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
+    private void connectToTheFirst() {
+        if (this.knownDevices.size() == 0) return;
 
-                @Override
-                public void onSuccess() {
-                    Log.d("Devices", "Connected !");
-                }
+        WifiP2pDevice device = this.knownDevices.get(0);
+        WifiP2pConfig config = new WifiP2pConfig();
+        config.deviceAddress = device.deviceAddress;
+        Log.d("Devices", "Connection to: "+config.deviceAddress);
+        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
 
-                @Override
-                public void onFailure(int reason) {
-                    Log.d("Devices", "Connection Failed !");
-                }
-            });
-        }
+            @Override
+            public void onSuccess() {
+                Log.d("Devices", "Connected !");
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Log.d("Devices", "Connection Failed !");
+            }
+        });
+    }
+
+    public void startServer() {
+        server.execute();
+    }
+
+    public void addIpAddress(String ip) {
+        this.knownIpAddresses.add(ip);
     }
 }
