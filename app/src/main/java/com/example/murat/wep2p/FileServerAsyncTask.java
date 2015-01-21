@@ -1,14 +1,14 @@
 package com.example.murat.wep2p;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
-import android.app.Activity;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -40,8 +40,12 @@ public class FileServerAsyncTask extends AsyncTask {
             activity.addIpAddress(clientIp);
 
             InputStream inputstream = client.getInputStream();
-            String res = inputstream.toString();
-            this.statusText.setText(res);
+            BufferedReader in = new BufferedReader(new InputStreamReader(inputstream));
+            String inputLine;
+            inputLine = in.readLine();
+            in.close();
+
+            this.statusText.setText(inputLine);
             serverSocket.close();
         } catch (IOException e) {
             Log.e("", e.getMessage());

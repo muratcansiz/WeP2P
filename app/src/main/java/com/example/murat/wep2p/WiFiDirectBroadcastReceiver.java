@@ -90,7 +90,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                             // One common case is creating a server thread and accepting
                             // incoming connections.
                             Log.d("", "We are the owner. Waiting for connections.");
-
+                            mActivity.setIsTheOwner(true);
                             Log.d("", "IP ADRESS::: " + groupOwnerAddress);
                         } else if (info.groupFormed) {
                             // The other device acts as the client. In this case,
@@ -101,10 +101,8 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 
 
                             String host = groupOwnerAddress;
-                            int port = 888;
-                            int len;
+                            int port = 8888;
                             Socket socket = new Socket();
-                            byte buf[]  = new byte[1024];
 
                             try {
                                 /**
@@ -119,7 +117,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                                  * of the socket. This data will be retrieved by the server device.
                                  */
                                 OutputStream outputStream = socket.getOutputStream();
-
+                                Log.d("Sending", "Hello");
                                 outputStream.write(new String("hello").getBytes());
 
                                 outputStream.close();
